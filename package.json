@@ -8,8 +8,8 @@
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.2",
-    "mongodb": "^3.0.2",
-    "short-url": "0.0.1"
+    "goo.gl": "^0.1.4",
+    "mongodb": "^3.0.2"
   },
   "engines": {
     "node": "8.x"

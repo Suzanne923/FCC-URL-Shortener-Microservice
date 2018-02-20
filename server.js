@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongo = require('mongodb').MongoClient;
-const shortUrl = require('short-url');
+const googl = require('goo.gl');
+googl.setKey('aBcDeFGhIjKLMnOPqRsT');
 const app = express();
 //shortened_urls
 
@@ -17,13 +18,17 @@ function validateUrl(url) {
 }
 
 function handleUrl(url) {  
-  shortUrl.shorten(url, (err, data) => {
-  console.log(data);
-    return {
-      original_url: url,
-      short_url: data
-    }
-  }); 
+  googl.shorten(url)
+    .then(shortUrl => {
+      console.log(shortUrl);
+      return {
+        original_url: url,
+        short_url: shortUrl
+      };
+    })
+    .catch(function (err) {
+      console.error(err.message);
+    });
 }
 
 app.get('/new', (req, res) => {
