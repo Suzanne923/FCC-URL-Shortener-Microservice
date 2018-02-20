@@ -51,14 +51,14 @@ function fetchUrl(shortUrl) {
     } else {
       const db = client.db('url_shortener_microservice');
       let urls = db.collection('shortened_urls');
-      console.log('fetching url');
+      console.log(shortUrl);
       urls.findOne({
         "shortUrl": shortUrl
       }, (err, data) => {
         if (err) {
           console.log('error: ', err);
         }
-        if (data) { console.log(data)};
+        if (data) return data;
       });
     }
   });
@@ -71,14 +71,13 @@ app.get('/new', (req, res) => {
 app.get('/new/:url(*)', (req, res) => {
   const url = req.params.url;
   if (validateUrl(url)) {
-    console.log('looks like a valid url');
     res.json(handleUrl(req.params.url));
   } else {
     res.json({error: "Incorrect url format"});
   }
 });
 app.get('/:url', (req, res) => {
-  const url = fetchUrl(req.params.url);
+  const url = fetchUrl("https://mesquite-novel.glitch.me/" + req.params.url);
   console.log(url);
   res.end();
 });
