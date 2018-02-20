@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongo = require('mongodb').MongoClient;
 const googl = require('goo.gl');
-googl.setKey('aBcDeFGhIjKLMnOPqRsT');
+googl.setKey('AIzaSyCnR5eKW1UDq0eQXAau8tsf7kmCEGZLEXQ');
 const app = express();
 //shortened_urls
 
@@ -21,10 +21,7 @@ function handleUrl(url) {
   googl.shorten(url)
     .then(shortUrl => {
       console.log(shortUrl);
-      return {
-        original_url: url,
-        short_url: shortUrl
-      };
+      return shortUrl;
     })
     .catch(function (err) {
       console.error(err.message);
@@ -37,8 +34,9 @@ app.get('/new', (req, res) => {
 app.get('/new/:url(*)', (req, res) => {
   const url = req.params.url;
   if (validateUrl(url)) {
-    console.log('looks like a valid url');
-    res.json(handleUrl(req.params.url));
+    let data = handleUrl(req.params.url);
+    console.log('data :', data);
+    res.json(data);
   } else {
     res.json({error: "Incorrect url format"});
   }
