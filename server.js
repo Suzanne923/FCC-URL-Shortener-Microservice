@@ -4,12 +4,14 @@ const bodyParser = require('body-parser');
 const mongo = require('mongodb');
 const shortid = require('shortid');
 const app = express();
-//shortened_urls
 
 app.use(cors());
 app.use(bodyParser.json());
-
 app.use(express.static(process.cwd() + '/views'));
+
+app.listen(process.env.PORT, () => {
+  console.log('Node.js listening ...');
+});
 
 function validateUrl(url) {
     const regex = /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,}))\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/i;
@@ -27,12 +29,12 @@ function handleUrl(url) {
 
 function storeUrl(url, shortUrl) {
   const mongoUrl = process.env.MONGOLAB_URI;
-  mongo.MongoClient.connect(mongoUrl, (err, db) => {
+  mongo.MongoClient.connect(mongoUrl, (err, client) => {
     if (err) {
       console.log("Unable to connect to database", err);
     } else {
-      console.log('adding url...');
-      let urls = db.getCollection('shortened_urls');
+      const db = client.db('url_shortener_microservice');
+      let urls = db.collection('shortened_urls');
       urls.insert({
         url: url,
         shortUrl: shortUrl
@@ -41,6 +43,10 @@ function storeUrl(url, shortUrl) {
   });
 }
 
+function redirect() {
+}
+
+// routes
 app.get('/new', (req, res) => {
   res.send("Error: You need to add a proper url");
 });
@@ -53,7 +59,4 @@ app.get('/new/:url(*)', (req, res) => {
     res.json({error: "Incorrect url format"});
   }
 });
-
-app.listen(process.env.PORT, () => {
-  console.log('Node.js listening ...');
-});
+app.get(':url', redirect);
