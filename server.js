@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongo = require('mongodb').MongoClient;
-const googl = require('goo.gl');
-googl.setKey('AIzaSyCnR5eKW1UDq0eQXAau8tsf7kmCEGZLEXQ');
+const shortid = require('shortid');
 const app = express();
 //shortened_urls
 
@@ -18,14 +17,8 @@ function validateUrl(url) {
 }
 
 function handleUrl(url) {  
-  googl.shorten(url)
-    .then(shortUrl => {
-      console.log(shortUrl);
-      storeUrl(url, shortUrl);
-    })
-    .catch(function (err) {
-      console.error(err.message);
-    });
+  const shortUrl = 'https://mesquite-novel.glitch.me/' + shortid.generate();
+  storeUrl(url, shortUrl);
   return {
     original_url: url,
     short_url: ''
@@ -36,8 +29,11 @@ function storeUrl(url, shortUrl) {
   const mongoUrl = process.env.MONGOLAB_URI;
   mongo.connect(mongoUrl, (err, db) => {
     if (err) throw err;
-    //let urls = db.getCollection('shortened_urls');
-
+    let urls = db.getCollection('shortened_urls');
+    urls.insert({
+      url: url,
+      shortUrl: shortUrl
+    });
   });
 }
 
