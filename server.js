@@ -39,11 +39,28 @@ function storeUrl(url, shortUrl) {
         url: url,
         shortUrl: shortUrl
       });
+      db.close();
     }
   });
 }
 
-function redirect() {
+function fetchUrl(shortUrl) {
+  const mongoUrl = process.env.MONGOLAB_URI;
+  mongo.MongoClient.connect(mongoUrl, (err, client) => {
+    if (err) {
+      console.log("Unable to connect to database", err);
+    } else {
+      const db = client.db('url_shortener_microservice');
+      let urls = db.collection('shortened_urls');
+      urls.findOne({
+        "shortUrl": shortUrl
+      }, (err, data) => {
+        if (err) throw err;
+        
+      });
+      db.close();
+    }
+  });
 }
 
 // routes
@@ -59,4 +76,7 @@ app.get('/new/:url(*)', (req, res) => {
     res.json({error: "Incorrect url format"});
   }
 });
-app.get(':url', redirect);
+app.get(':url', (req, res) => {
+  const url = fetchUrl(req.params.url);
+  res.end();
+});
