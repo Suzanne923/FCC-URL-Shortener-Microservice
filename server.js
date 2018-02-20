@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const mongo = require('mongodb').MongoClient;
 const app = express();
-
-const mongoUrl = process.env.MONGOLAB_URI;
+//shortened_urls
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -27,4 +27,7 @@ app.get('/new/:url', (req, res) => {
 app.listen(process.env.PORT, () => {
   console.log('Node.js listening ...');
 });
+
+const mongoUrl = process.env.MONGOLAB_URI;
+mongo.connect(
 
