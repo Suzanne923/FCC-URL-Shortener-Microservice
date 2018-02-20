@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const mongo = require('mongodb').MongoClient;
+const mongo = require('mongodb');
 const shortid = require('shortid');
 const app = express();
 //shortened_urls
@@ -21,19 +21,23 @@ function handleUrl(url) {
   storeUrl(url, shortUrl);
   return {
     original_url: url,
-    short_url: ''
+    short_url: shortUrl
   };  
 }
 
 function storeUrl(url, shortUrl) {
   const mongoUrl = process.env.MONGOLAB_URI;
-  mongo.connect(mongoUrl, (err, db) => {
-    if (err) throw err;
-    let urls = db.getCollection('shortened_urls');
-    urls.insert({
-      url: url,
-      shortUrl: shortUrl
-    });
+  mongo.MongoClient.connect(mongoUrl, (err, db) => {
+    if (err) {
+      console.log("Unable to connect to database", err);
+    } else {
+      console.log('adding url...');
+      let urls = db.getCollection('shortened_urls');
+      urls.insert({
+        url: url,
+        shortUrl: shortUrl
+      });
+    }
   });
 }
 
@@ -44,9 +48,7 @@ app.get('/new/:url(*)', (req, res) => {
   const url = req.params.url;
   if (validateUrl(url)) {
     console.log('looks like a valid url');
-    const data = handleUrl(req.params.url);
-    console.log('data :', data);
-    res.json(data);
+    res.json(handleUrl(req.params.url));
   } else {
     res.json({error: "Incorrect url format"});
   }
