@@ -25,9 +25,10 @@ function handleUrl(url) {
 app.get('/new', (req, res) => {
   res.send("Error: You need to add a proper url");
 });
-app.get('/new/:url', (req, res) => {
+app.get('/new/:url(*)', (req, res) => {
   const url = req.params.query;
   if (validateUrl(url)) {
+    console.log('looks like a valid url');
     res.json(handleUrl(req.params.query));
   } else {
     res.json({error: "Incorrect url format"});
