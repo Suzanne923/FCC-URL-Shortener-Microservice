@@ -39,7 +39,6 @@ function storeUrl(url, shortUrl) {
         url: url,
         shortUrl: shortUrl
       });
-      db.close();
     }
   });
 }
@@ -52,13 +51,15 @@ function fetchUrl(shortUrl) {
     } else {
       const db = client.db('url_shortener_microservice');
       let urls = db.collection('shortened_urls');
+      console.log('fetching url');
       urls.findOne({
         "shortUrl": shortUrl
       }, (err, data) => {
-        if (err) throw err;
-        
+        if (err) {
+          console.log('error: ', err);
+        }
+        if (data) { console.log(data)};
       });
-      db.close();
     }
   });
 }
@@ -76,7 +77,8 @@ app.get('/new/:url(*)', (req, res) => {
     res.json({error: "Incorrect url format"});
   }
 });
-app.get(':url', (req, res) => {
+app.get('/:url', (req, res) => {
   const url = fetchUrl(req.params.url);
+  console.log(url);
   res.end();
 });
