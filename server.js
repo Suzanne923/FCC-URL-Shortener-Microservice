@@ -36,10 +36,20 @@ function storeUrl(url, shortUrl) {
     } else {
       const db = client.db('url_shortener_microservice');
       let urls = db.collection('shortened_urls');
-      urls.insert({
-        url: url,
-        shortUrl: shortUrl
-      });
+      
+      urls.findOne({
+        "url": url
+      }, (err, data) => {
+        if (err) {
+          throw err;
+        }
+        if (!data) { 
+          urls.insert({
+            url: url,
+            shortUrl: shortUrl
+          });
+        };
+      }); 
     }
   });
 }
