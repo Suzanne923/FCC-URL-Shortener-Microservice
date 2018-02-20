@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const mongo = require('mongodb');
+const mongo = require('mongodb').MongoClient;
 const shortid = require('shortid');
 const app = express();
+
+const mongoUrl = process.env.MONGOLAB_URI;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -28,8 +30,7 @@ function handleUrl(url) {
 }
 
 function storeUrl(url, shortUrl) {
-  const mongoUrl = process.env.MONGOLAB_URI;
-  mongo.MongoClient.connect(mongoUrl, (err, client) => {
+  mongo.connect(mongoUrl, (err, client) => {
     if (err) {
       console.log("Unable to connect to database", err);
     } else {
@@ -43,22 +44,23 @@ function storeUrl(url, shortUrl) {
   });
 }
 
-function fetchUrl(shortUrl) {
-  const mongoUrl = process.env.MONGOLAB_URI;
-  mongo.MongoClient.connect(mongoUrl, (err, client) => {
+const fetchUrl = (req, res) => {
+  const url = "https://mesquite-novel.glitch.me/" + req.params.url;
+  mongo.connect(mongoUrl, (err, client) => {
     if (err) {
       console.log("Unable to connect to database", err);
     } else {
       const db = client.db('url_shortener_microservice');
       let urls = db.collection('shortened_urls');
-      console.log(shortUrl);
       urls.findOne({
-        "shortUrl": shortUrl
+        "shortUrl": url
       }, (err, data) => {
         if (err) {
           console.log('error: ', err);
         }
-        if (data) return data;
+        if (data) { 
+          res.redirect(data.url);
+        };
       });
     }
   });
@@ -76,8 +78,4 @@ app.get('/new/:url(*)', (req, res) => {
     res.json({error: "Incorrect url format"});
   }
 });
-app.get('/:url', (req, res) => {
-  const url = fetchUrl("https://mesquite-novel.glitch.me/" + req.params.url);
-  console.log(url);
-  res.end();
-});
+app.get('/:url', fetchUrl);
