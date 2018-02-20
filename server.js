@@ -21,11 +21,24 @@ function handleUrl(url) {
   googl.shorten(url)
     .then(shortUrl => {
       console.log(shortUrl);
-      return shortUrl;
+      storeUrl(url, shortUrl);
     })
     .catch(function (err) {
       console.error(err.message);
     });
+  return {
+    original_url: url,
+    short_url: ''
+  };  
+}
+
+function storeUrl(url, shortUrl) {
+  const mongoUrl = process.env.MONGOLAB_URI;
+  mongo.connect(mongoUrl, (err, db) => {
+    if (err) throw err;
+    //let urls = db.getCollection('shortened_urls');
+
+  });
 }
 
 app.get('/new', (req, res) => {
@@ -34,7 +47,8 @@ app.get('/new', (req, res) => {
 app.get('/new/:url(*)', (req, res) => {
   const url = req.params.url;
   if (validateUrl(url)) {
-    let data = handleUrl(req.params.url);
+    console.log('looks like a valid url');
+    const data = handleUrl(req.params.url);
     console.log('data :', data);
     res.json(data);
   } else {
@@ -44,11 +58,4 @@ app.get('/new/:url(*)', (req, res) => {
 
 app.listen(process.env.PORT, () => {
   console.log('Node.js listening ...');
-});
-
-const mongoUrl = process.env.MONGOLAB_URI;
-mongo.connect(mongoUrl, (err, db) => {
-  if (err) throw err;
-  //let urls = db.getCollection('shortened_urls');
-  console.log('Connected to MongoDB');
 });
