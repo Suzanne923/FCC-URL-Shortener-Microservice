@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongo = require('mongodb').MongoClient;
+const shortUrl = require('short-url');
 const app = express();
 //shortened_urls
 
@@ -15,21 +16,24 @@ function validateUrl(url) {
     return regex.test(url);
 }
 
-function handleUrl(url) {
-  return {
-    original_url: '',
-    short_url: ''
-  }
+function handleUrl(url) {  
+  shortUrl.shorten(url, (err, data) => {
+  console.log(data);
+    return {
+      original_url: url,
+      short_url: data
+    }
+  }); 
 }
 
 app.get('/new', (req, res) => {
   res.send("Error: You need to add a proper url");
 });
 app.get('/new/:url(*)', (req, res) => {
-  const url = req.params.query;
+  const url = req.params.url;
   if (validateUrl(url)) {
     console.log('looks like a valid url');
-    res.json(handleUrl(req.params.query));
+    res.json(handleUrl(req.params.url));
   } else {
     res.json({error: "Incorrect url format"});
   }
